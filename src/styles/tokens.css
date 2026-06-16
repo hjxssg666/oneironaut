@@ -1,0 +1,117 @@
+/* ============================================================
+   梦海 (Oneironaut) · 设计系统 Token
+   与诗云同款两色体系 + 8 情绪色谱 + 极简 UI
+   ============================================================ */
+
+:root {
+  /* ── 表面色（墨黑宇宙） ── */
+  --ink-900: #04050a;
+  --ink-800: #080a12;
+  --ink-700: #0e101a;
+
+  /* ── 品牌色（暖金） ── */
+  --gold-500: #ffd27a;
+  --gold-400: #f6dca6;
+  --gold-600: #e0a85a;
+
+  /* ── 前景文字 ── */
+  --fg-100: #e8ecf4;
+  --fg-200: #b9c2d6;
+  --muted-100: #8b93a7;
+  --muted-200: #5a627a;
+
+  /* ── 情绪色谱（梦境专属） ── */
+  --mood-serene: #a8d8ff;
+  --mood-joy: #ffd27a;
+  --mood-fear: #7a6aff;
+  --mood-anger: #ff5a5a;
+  --mood-sorrow: #5a8aff;
+  --mood-mystic: #b96aff;
+  --mood-anxious: #5ac8a8;
+  --mood-nostalgic: #d8a878;
+
+  /* ── 透明度 ── */
+  --alpha-white-04: rgba(255, 255, 255, 0.04);
+  --alpha-white-08: rgba(255, 255, 255, 0.08);
+  --alpha-white-12: rgba(255, 255, 255, 0.12);
+  --alpha-gold-16: rgba(255, 210, 122, 0.16);
+  --alpha-gold-40: rgba(255, 210, 122, 0.40);
+
+  /* ── 字体家族 ── */
+  --font-ui: 'Inter', 'PingFang SC', 'Microsoft YaHei',
+    'Noto Sans CJK SC', system-ui, sans-serif;
+  --font-dream: 'LXGW WenKai', 'LXGW WenKai TC', 'Kaiti SC', 'STKaiti',
+    'KaiTi', '楷体', 'Source Han Serif SC', 'Noto Serif SC',
+    'Songti SC', 'STSong', 'SimSun', serif;
+  --font-mono: 'JetBrains Mono', 'ui-monospace', 'SF Mono', 'Menlo', monospace;
+
+  /* ── 字重 ── */
+  --fw-light: 300;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-bold: 700;
+
+  /* ── 字号阶梯（Modular Scale 1.250） ── */
+  --text-display-3xl: clamp(4rem, 6vw, 5.5rem);
+  --text-display-2xl: clamp(3rem, 4vw, 4rem);
+  --text-display-xl: clamp(2.25rem, 3vw, 3rem);
+  --text-display-lg: 2.5rem;
+  --text-display-md: 2rem;
+  --text-heading-1: 1.5rem;
+  --text-heading-2: 1.25rem;
+  --text-heading-3: 1.125rem;
+  --text-body-lg: 1rem;
+  --text-body-md: 0.875rem;
+  --text-body-sm: 0.8125rem;
+  --text-caption: 0.75rem;
+  --text-overline: 0.6875rem;
+  --text-mono-sm: 0.75rem;
+
+  /* ── 间距（8px 栅格） ── */
+  --space-0: 0;
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 12px;
+  --space-6: 16px;
+  --space-8: 24px;
+  --space-10: 32px;
+  --space-12: 40px;
+  --space-16: 56px;
+  --space-20: 72px;
+  --space-24: 96px;
+  --space-32: 128px;
+
+  /* ── 圆角 ── */
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 20px;
+  --radius-full: 9999px;
+
+  /* ── 光晕 ── */
+  --glow-sm: drop-shadow(0 0 4px rgba(255, 210, 122, 0.20));
+  --glow-md: drop-shadow(0 0 12px rgba(255, 210, 122, 0.32));
+  --glow-lg: drop-shadow(0 0 24px rgba(255, 210, 122, 0.48));
+
+  /* ── 过渡 ── */
+  --ease-natural: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-crisp: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: ease-out;
+  --ease-linear: linear;
+
+  /* ── UI 尺寸 ── */
+  --hud-top-height: 56px;
+  --hud-bottom-height: 40px;
+}
+
+/* 背景设为默认墨黑（全局） */
+html {
+  background: var(--ink-900);
+  color: var(--fg-100);
+  font-family: var(--font-ui);
+}

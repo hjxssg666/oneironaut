@@ -1,0 +1,21 @@
+[
+  { "slug": "飞行", "label": "飞行" },
+  { "slug": "坠落", "label": "坠落" },
+  { "slug": "水", "label": "水" },
+  { "slug": "知识", "label": "知识" },
+  { "slug": "声音", "label": "声音" },
+  { "slug": "书籍", "label": "书籍" },
+  { "slug": "月亮", "label": "月亮" },
+  { "slug": "星星", "label": "星星" },
+  { "slug": "迷宫", "label": "迷宫" },
+  { "slug": "时间", "label": "时间" },
+  { "slug": "自我", "label": "自我" },
+  { "slug": "童年", "label": "童年" },
+  { "slug": "城市", "label": "城市" },
+  { "slug": "植物", "label": "植物" },
+  { "slug": "记忆", "label": "记忆" },
+  { "slug": "孤独", "label": "孤独" },
+  { "slug": "距离", "label": "距离" },
+  { "slug": "变化", "label": "变化" },
+  { "slug": "自然", "label": "自然" }
+]
