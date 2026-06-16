@@ -8,7 +8,9 @@ import Onboarding from '../components/Onboarding';
 import Landing from '../components/Landing';
 import TimelinePanel from '../components/TimelinePanel';
 import CollectionPanel from '../components/CollectionPanel';
+import AIPanel from '../components/AIPanel';
 import FPSMonitor from '../components/FPSMonitor';
+import OnlineIndicator from '../components/OnlineIndicator';
 import DreamInput from './Input';
 import { useUIStore } from '../store/uiStore';
 import { useDreamStore } from '../store/dreamStore';
@@ -63,8 +65,14 @@ export default function ScenePage() {
       <TimelinePanel />
       <CollectionPanel />
 
+      {/* T-019: AI 梦境生成面板 */}
+      <AIPanel />
+
       {/* FPS 性能监控 */}
       <FPSMonitor />
+
+      {/* T-020: 在线状态 */}
+      <OnlineIndicator />
 
       {/* IndexedDB 同步状态指示 */}
       {dbStatus === 'error' && (

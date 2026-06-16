@@ -74,6 +74,13 @@ export default function HudTop() {
         >
           ⭐ {isMobile ? '' : '拾遗'}
         </button>
+        <button
+          className="btn"
+          onClick={() => setView(selectedView === 'ai' ? 'stars' : 'ai')}
+          style={{ fontSize: isMobile ? 12 : undefined, color: selectedView === 'ai' ? 'var(--gold-500)' : undefined }}
+        >
+          🤖 {isMobile ? '' : 'AI'}
+        </button>
         <button className="btn" onClick={toggleSearch} style={{ fontSize: isMobile ? 12 : undefined }}>
           🔍 {isMobile ? '' : '搜索'}
         </button>

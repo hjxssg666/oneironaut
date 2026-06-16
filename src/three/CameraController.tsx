@@ -3,6 +3,7 @@ import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useCameraStore } from '../store/cameraStore';
 import { useUIStore } from '../store/uiStore';
+import { useWebSocket } from '../hooks/useWebSocket';
 
 /** WASD + 拖拽 + 滚轮 + 触控 飞行控制 */
 export default function CameraController() {
@@ -26,6 +27,10 @@ export default function CameraController() {
   const isOnboarding = useUIStore((s) => s.isOnboarding);
   const autoFlyElapsed = useRef(0);
   const autoFlyDone = useRef(false);
+
+  // T-021: WebSocket 位置广播
+  const { updatePosition: broadcastPosition } = useWebSocket();
+  const lastBroadcast = useRef(0);
 
   const BASE_Z = 150;
   const MAX_Z = 250;
@@ -206,6 +211,17 @@ export default function CameraController() {
     setCamera([camera.position.x, camera.position.y, camera.position.z]);
     const lookDir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).normalize();
     setCamDir([lookDir.x, lookDir.y, lookDir.z]);
+
+    // T-021: 每秒广播一次位置
+    const now = performance.now();
+    if (now - lastBroadcast.current > 1000) {
+      broadcastPosition({
+        x: Math.round(camera.position.x),
+        y: Math.round(camera.position.y),
+        z: Math.round(camera.position.z),
+      });
+      lastBroadcast.current = now;
+    }
   });
 
   return null;
