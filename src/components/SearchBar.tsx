@@ -72,6 +72,7 @@ export default function SearchBar() {
                 key={d.id}
                 onClick={() => {
                   selectDream(d);
+                  useUIStore.getState().setDreamCardOpen(true);
                   toggleSearch();
                 }}
                 style={{

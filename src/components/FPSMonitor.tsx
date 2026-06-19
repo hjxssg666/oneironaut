@@ -77,12 +77,12 @@ export default function FPSMonitor() {
   if (!isHudVisible) return null;
 
   const color =
-    fps >= 55 ? 'var(--muted-200)' :
+    fps >= 110 ? 'var(--muted-200)' :
     fps >= 30 ? '#d8a878' :
     '#ff5a5a';
 
   const dotColor =
-    fps >= 55 ? '#5ac8a8' :
+    fps >= 110 ? '#5ac8a8' :
     fps >= 30 ? '#d8a878' :
     '#ff5a5a';
 
@@ -111,7 +111,7 @@ export default function FPSMonitor() {
         <span style={{ width: 6, height: 6, borderRadius: '50%', background: dotColor, display: 'inline-block' }} />
         {fps} FPS · avg {avgFps} · min {minFps}
       </div>
-      <div style={{ color: 'var(--muted-200)', fontSize: 10 }}>
+      <div style={{ color: 'var(--muted-100)', fontSize: 'var(--text-mono-xs, 11px)' }}>
         {frameTime}ms · 画质 {qualityLabel}
       </div>
     </div>

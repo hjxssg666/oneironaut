@@ -17,7 +17,8 @@ export function useWebSocket(serverUrl?: string) {
   const [myColor, setMyColor] = useState('#a78bfa');
   const reconnectRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const url = serverUrl || `ws://${window.location.hostname}:3001`;
+  const WS_PORT = (import.meta as any).env?.VITE_WS_PORT || '3001';
+  const url = serverUrl || `ws://${window.location.hostname}:${WS_PORT}`;
 
   const connect = useCallback(() => {
     try {

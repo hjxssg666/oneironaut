@@ -52,31 +52,32 @@ const fragmentShader = /* glsl */ `
   }
 
   void main() {
-    // 域扭曲：噪声驱动坐标偏移，产生流体感
     vec2 q = vUv;
-    float warp = noise(q * 2.5 + uTime * 0.03) * 0.08;
-    q.x += warp;
-    q.y += noise(q * 3.0 + uTime * 0.04 + 1.5) * 0.06;
 
-    // FBM 叠加慢速漂移
-    float f = fbm(q * 3.5 + uTime * 0.015);
+    // 水平波纹：模拟深海缓慢波动
+    float wave1 = sin(q.y * 8.0 + uTime * 0.003) * 0.04;
+    float wave2 = cos(q.y * 5.5 - uTime * 0.005 + 1.2) * 0.03;
+    float wave3 = sin(q.x * 4.0 + uTime * 0.004 + 2.5) * 0.025;
+    q.x += wave1 + wave2;
+    q.y += wave3;
 
-    // 第二层大尺度流
-    float f2 = fbm(q * 1.8 - uTime * 0.01 + vec2(2.0, 4.0));
+    // FBM 叠加
+    float f = fbm(q * 3.0 + uTime * 0.002);
 
-    // 混合深度色、中间色、金色高光
-    float mix1 = smoothstep(0.25, 0.65, f * 0.7 + f2 * 0.3);
-    float mix2 = smoothstep(0.58, 0.78, f + f2 * 0.4);
+    // 大尺度缓慢漂移
+    float f2 = fbm(q * 1.5 - uTime * 0.001 + vec2(2.0, 4.0));
+
+    // 混合颜色
+    float mix1 = smoothstep(0.3, 0.7, f * 0.5 + f2 * 0.5);
+    float mix2 = smoothstep(0.65, 0.88, f + f2 * 0.25);
 
     vec3 color = mix(uColorDeep, uColorMid, mix1);
-    color = mix(color, uColorGold, mix2 * 0.25);
+    color = mix(color, uColorGold, mix2 * 0.05);
 
-    // 微弱的渐晕
-    float vignette = 1.0 - length(vUv - 0.5) * 0.45;
+    // 渐晕
+    float vignette = 1.0 - length(vUv - 0.5) * 0.3;
     color *= vignette;
-
-    // 极低的整体亮度，保持星空为主视觉
-    color *= 0.55;
+    color *= 0.35;
 
     gl_FragColor = vec4(color, 1.0);
   }
@@ -88,9 +89,9 @@ export default function FluidBackground() {
   const uniforms = useMemo(
     () => ({
       uTime: { value: 0 },
-      uColorDeep: { value: new THREE.Color('#04050a') },
-      uColorMid: { value: new THREE.Color('#0a0f2e') },
-      uColorGold: { value: new THREE.Color('#1a1040') },
+      uColorDeep: { value: new THREE.Color('#000000') },
+      uColorMid: { value: new THREE.Color('#000003') },
+      uColorGold: { value: new THREE.Color('#000008') },
     }),
     [],
   );

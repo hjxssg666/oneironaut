@@ -137,7 +137,7 @@ export default function AIPanel() {
                     transition: 'width 0.3s',
                   }} />
                 </div>
-                <span style={{ fontSize: 10, color: 'var(--muted-200)' }}>
+                <span style={{ fontSize: 'var(--text-caption)', color: 'var(--muted-100)' }}>
                   下载中 {Math.round(loadProgress)}%
                 </span>
               </div>
@@ -151,7 +151,7 @@ export default function AIPanel() {
           <div>
             <div style={{ display: 'flex', gap: 4, marginBottom: 4, alignItems: 'center' }}>
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#5ac8a8' }} />
-              <span style={{ fontSize: 10, color: '#5ac8a8' }}>模型已就绪</span>
+              <span style={{ fontSize: 'var(--text-caption)', color: '#5ac8a8', fontWeight: 500 }}>模型已就绪</span>
             </div>
             <textarea
               value={prompt}

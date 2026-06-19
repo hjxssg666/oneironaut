@@ -1,20 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useDreamStore } from '../store/dreamStore';
 import SlidePanel from './SlidePanel';
 import { useUIStore } from '../store/uiStore';
+import { moodLabels, moodColors } from '../constants/moods';
 
-const moodLabels: Record<string, string> = {
-  serene: '平静', joy: '喜悦', fear: '恐惧', anger: '愤怒',
-  sorrow: '悲伤', mystic: '神秘', anxious: '焦虑', nostalgic: '怀旧',
-};
-
-const moodColors: Record<string, string> = {
-  serene: 'var(--mood-serene)', joy: 'var(--mood-joy)', fear: 'var(--mood-fear)',
-  anger: 'var(--mood-anger)', sorrow: 'var(--mood-sorrow)', mystic: 'var(--mood-mystic)',
-  anxious: 'var(--mood-anxious)', nostalgic: 'var(--mood-nostalgic)',
-};
-
-/** 拾遗收藏列表面板 */
+/** 拾遗收藏面板 — 数据源为 localStorage 珍藏列表 */
 export default function CollectionPanel() {
   const dreams = useDreamStore((s) => s.dreams);
   const selectDream = useDreamStore((s) => s.selectDream);
@@ -23,14 +13,25 @@ export default function CollectionPanel() {
 
   const [search, setSearch] = useState('');
 
-  const publicDreams = dreams.filter((d) => d.isPublic);
+  // 从 localStorage 读取珍藏的 dream ID 列表
+  const favIds: string[] = useMemo(() => {
+    try { return JSON.parse(localStorage.getItem('dreamsea-favs') || '[]'); }
+    catch { return []; }
+  }, []);
+
+  // 匹配的珍藏梦境
+  const favDreams = useMemo(
+    () => dreams.filter(d => favIds.includes(d.id)),
+    [dreams, favIds],
+  );
+
   const filtered = search.trim()
-    ? publicDreams.filter(
+    ? favDreams.filter(
         (d) =>
           d.content.includes(search) ||
           d.themes.some((t) => t.includes(search)),
       )
-    : publicDreams;
+    : favDreams;
 
   return (
     <SlidePanel
@@ -42,7 +43,7 @@ export default function CollectionPanel() {
       <input
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        placeholder="搜索公开梦境..."
+        placeholder="搜索珍藏梦境..."
         style={{
           width: '100%',
           padding: '8px 12px',
@@ -67,7 +68,7 @@ export default function CollectionPanel() {
           marginBottom: 16,
         }}
       >
-        共 {publicDreams.length} 条公开梦境
+        共 {favDreams.length} 条珍藏梦境
       </p>
 
       {filtered.length === 0 ? (
@@ -80,8 +81,8 @@ export default function CollectionPanel() {
             fontSize: 'var(--text-body-md)',
           }}
         >
-          {publicDreams.length === 0
-            ? '还没有公开的梦境'
+          {favDreams.length === 0
+            ? '还没有珍藏的梦境，点击梦境详情中的 ⭐ 珍藏'
             : '未找到匹配的梦境'}
         </div>
       ) : (
@@ -89,7 +90,7 @@ export default function CollectionPanel() {
           {filtered.map((d) => (
             <button
               key={d.id}
-              onClick={() => selectDream(d)}
+              onClick={() => { selectDream(d); useUIStore.getState().setDreamCardOpen(true); }}
               style={{
                 display: 'flex',
                 alignItems: 'flex-start',

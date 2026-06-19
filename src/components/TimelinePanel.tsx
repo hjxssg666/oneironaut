@@ -2,17 +2,7 @@ import { useState } from 'react';
 import { useDreamStore } from '../store/dreamStore';
 import SlidePanel from './SlidePanel';
 import { useUIStore } from '../store/uiStore';
-
-const moodLabels: Record<string, string> = {
-  serene: '平静', joy: '喜悦', fear: '恐惧', anger: '愤怒',
-  sorrow: '悲伤', mystic: '神秘', anxious: '焦虑', nostalgic: '怀旧',
-};
-
-const moodColors: Record<string, string> = {
-  serene: 'var(--mood-serene)', joy: 'var(--mood-joy)', fear: 'var(--mood-fear)',
-  anger: 'var(--mood-anger)', sorrow: 'var(--mood-sorrow)', mystic: 'var(--mood-mystic)',
-  anxious: 'var(--mood-anxious)', nostalgic: 'var(--mood-nostalgic)',
-};
+import { moodLabels, moodColors } from '../constants/moods';
 
 /** 时间线列表面板 */
 export default function TimelinePanel() {
@@ -80,7 +70,7 @@ export default function TimelinePanel() {
           {filtered.map((d) => (
             <button
               key={d.id}
-              onClick={() => selectDream(d)}
+              onClick={() => { selectDream(d); useUIStore.getState().setDreamCardOpen(true); }}
               style={{
                 display: 'flex',
                 alignItems: 'flex-start',

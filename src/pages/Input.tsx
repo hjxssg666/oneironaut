@@ -1,21 +1,6 @@
 import { useState } from 'react';
 import { useDreamStore } from '../store/dreamStore';
-
-interface Props {
-  onClose: () => void;
-  onSave: (dream: { content: string; emotion: string; themes: string[]; isPublic: boolean }) => void;
-}
-
-const moodOptions = [
-  { key: 'serene', label: '平静' },
-  { key: 'joy', label: '喜悦' },
-  { key: 'fear', label: '恐惧' },
-  { key: 'anger', label: '愤怒' },
-  { key: 'sorrow', label: '悲伤' },
-  { key: 'mystic', label: '神秘' },
-  { key: 'anxious', label: '焦虑' },
-  { key: 'nostalgic', label: '怀旧' },
-];
+import { moodOptions } from '../constants/moods';
 
 const quickThemes = ['飞行', '水', '追逐', '坠落', '时间', '记忆', '城市', '自然'];
 

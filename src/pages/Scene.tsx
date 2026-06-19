@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Scene3D from '../three/Scene';
 import HudTop from '../components/HudTop';
 import HudBottom from '../components/HudBottom';
@@ -9,7 +9,9 @@ import Landing from '../components/Landing';
 import TimelinePanel from '../components/TimelinePanel';
 import CollectionPanel from '../components/CollectionPanel';
 import AIPanel from '../components/AIPanel';
+import Settings from './Settings';
 import FPSMonitor from '../components/FPSMonitor';
+import ShortcutPanel from '../components/ShortcutPanel';
 import OnlineIndicator from '../components/OnlineIndicator';
 import DreamInput from './Input';
 import { useUIStore } from '../store/uiStore';
@@ -24,13 +26,21 @@ export default function ScenePage() {
   const isInputOpen = useUIStore((s) => s.isInputOpen);
   const setInputOpen = useUIStore((s) => s.setInputOpen);
   const isLandingDone = useUIStore((s) => s.isLandingDone);
+  const isOnboarding = useUIStore((s) => s.isOnboarding);
+  const [showTip, setShowTip] = useState(false);
 
-  /** 启动时从 IndexedDB 加载持久化梦境 */
+  // Onboarding完成后3秒引导提示
   useEffect(() => {
-    initFromDB();
-  }, [initFromDB]);
+    if (isLandingDone && !isOnboarding) {
+      const t = setTimeout(() => setShowTip(true), 500);
+      const t2 = setTimeout(() => setShowTip(false), 5000);
+      return () => { clearTimeout(t); clearTimeout(t2); };
+    }
+  }, [isLandingDone, isOnboarding]);
 
-  /** 点击虚空区域 → 生成随机梦境 */
+  useEffect(() => { initFromDB(); }, [initFromDB]);
+
+  // 35K 梦境已在 dreamStore 初始化时同步生成，落地页就有星辰
   const handleVoidClick = () => {
     const generated = generateVoidDream();
     addDream({
@@ -61,6 +71,19 @@ export default function ScenePage() {
       <SearchBar />
       <DreamCard />
 
+      {/* 引导提示：Onboarding结束后短暂出现 */}
+      {showTip && (
+        <div style={{
+          position: 'fixed', bottom: '30%', left: '50%', transform: 'translateX(-50%)',
+          zIndex: 20, pointerEvents: 'none',
+          fontFamily: 'var(--font-dream)', fontSize: 'var(--text-body-lg)',
+          color: 'var(--gold-500)', textShadow: '0 0 20px var(--gold-500)66',
+          animation: 'fadeSlideIn 0.6s ease-out, breathe-glow 3s ease-in-out infinite',
+        }}>
+          点击星辉 · 查看梦境
+        </div>
+      )}
+
       {/* T-008/T-009: 时间线 + 收藏面板 */}
       <TimelinePanel />
       <CollectionPanel />
@@ -68,8 +91,12 @@ export default function ScenePage() {
       {/* T-019: AI 梦境生成面板 */}
       <AIPanel />
 
+      {/* 设置页 */}
+      <Settings />
+
       {/* FPS 性能监控 */}
       <FPSMonitor />
+      <ShortcutPanel />
 
       {/* T-020: 在线状态 */}
       <OnlineIndicator />
@@ -117,6 +144,7 @@ export default function ScenePage() {
           onSave={(dream) => {
             addDream(dream);
             setInputOpen(false);
+            useUIStore.getState().setDreamCardOpen(true);
           }}
         />
       )}

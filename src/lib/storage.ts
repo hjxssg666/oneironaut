@@ -1,10 +1,13 @@
-/** IndexedDB 封装 - 离线存储用户梦境 */
+/** IndexedDB 封装 - 离线存储用户梦境（单例连接） */
 
 const DB_NAME = 'oneironaut';
 const STORE_NAME = 'dreams';
 const DB_VERSION = 1;
 
-function openDB(): Promise<IDBDatabase> {
+let _dbCache: IDBDatabase | null = null;
+
+async function openDB(): Promise<IDBDatabase> {
+  if (_dbCache) return _dbCache;
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = () => {
@@ -13,8 +16,16 @@ function openDB(): Promise<IDBDatabase> {
         db.createObjectStore(STORE_NAME, { keyPath: 'id' });
       }
     };
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => {
+      _dbCache = req.result;
+      _dbCache.onclose = () => { _dbCache = null; };
+      resolve(_dbCache);
+    };
     req.onerror = () => reject(req.error);
+    req.onblocked = () => {
+      if (_dbCache) _dbCache.close();
+      _dbCache = null;
+    };
   });
 }
 

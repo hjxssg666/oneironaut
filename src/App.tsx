@@ -1,4 +1,5 @@
 import ScenePage from './pages/Scene';
+import ErrorBoundary from './components/ErrorBoundary';
 import { useUIStore } from './store/uiStore';
 import { useDreamStore } from './store/dreamStore';
 import { useEffect } from 'react';
@@ -23,21 +24,21 @@ export default function App() {
     const match = hash.match(/#dream=(d-[^\s&]+)/);
     if (match) {
       const dreamId = match[1];
+      let retries = 0;
+      const MAX_RETRIES = 20;
       // 等待 store 初始化完成后查找梦境
       const trySelect = () => {
         const dreams = useDreamStore.getState().dreams;
         const dream = dreams.find((d) => d.id === dreamId);
         if (dream) {
           useDreamStore.getState().selectDream(dream);
-        } else {
-          // 如果梦境不在列表中（可能从 URL 直接访问），稍后重试
+        } else if (++retries < MAX_RETRIES) {
           setTimeout(trySelect, 500);
         }
       };
-      // 延迟执行，确保 initFromDB 已完成
       setTimeout(trySelect, 1000);
     }
   }, []);
 
-  return <ScenePage />;
+  return <ErrorBoundary><ScenePage /></ErrorBoundary>;
 }

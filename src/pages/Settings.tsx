@@ -2,9 +2,12 @@ import { useUIStore } from '../store/uiStore';
 
 /** 设置页 */
 export default function Settings() {
+  const selectedView = useUIStore((s) => s.selectedView);
   const quality = useUIStore((s) => s.quality);
   const setQuality = useUIStore((s) => s.setQuality);
   const setView = useUIStore((s) => s.setView);
+
+  if (selectedView !== 'settings') return null;
 
   return (
     <div

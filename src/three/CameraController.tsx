@@ -1,8 +1,9 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect } from 'react';
 import { useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useCameraStore } from '../store/cameraStore';
 import { useUIStore } from '../store/uiStore';
+import { useDreamStore } from '../store/dreamStore';
 import { useWebSocket } from '../hooks/useWebSocket';
 
 /** WASD + 拖拽 + 滚轮 + 触控 飞行控制 */
@@ -11,6 +12,7 @@ export default function CameraController() {
   const keys = useRef<Set<string>>(new Set());
   const isDragging = useRef(false);
   const prevMouse = useRef({ x: 0, y: 0 });
+  const dragDist = useRef(0);
   const yaw = useRef(0);
   const pitch = useRef(0);
   // 触控状态
@@ -19,6 +21,8 @@ export default function CameraController() {
   const setCamera = useCameraStore((s) => s.setPosition);
   const setCamDir = useCameraStore((s) => s.setDirection);
   const speed = useCameraStore((s) => s.speed);
+  const setOrbitTarget = useCameraStore((s) => s.setOrbitTarget);
+  const selectedDream = useDreamStore((s) => s.selectedDream);
 
   // T-007: 落地页视差进度
   const landingProgress = useUIStore((s) => s.landingProgress);
@@ -32,14 +36,19 @@ export default function CameraController() {
   const { updatePosition: broadcastPosition } = useWebSocket();
   const lastBroadcast = useRef(0);
 
-  const BASE_Z = 150;
-  const MAX_Z = 250;
+  const BASE_Z = 180;
+  const MAX_Z = 280;
 
   // 初始位置
   useEffect(() => {
-    camera.position.set(0, 0, BASE_Z);
+    camera.position.set(0, 40, BASE_Z);
     camera.lookAt(0, 0, 0);
   }, [camera]);
+
+  // 取消选中时退出环绕
+  useEffect(() => {
+    if (!selectedDream) setOrbitTarget(null);
+  }, [selectedDream, setOrbitTarget]);
 
   // 键盘监听
   useEffect(() => {
@@ -48,31 +57,38 @@ export default function CameraController() {
     };
     const onKeyUp = (e: KeyboardEvent) => keys.current.delete(e.key.toLowerCase());
 
-    // 鼠标拖拽
+    // 鼠标拖拽 + 手势区分
     const onMouseDown = (e: MouseEvent) => {
       isDragging.current = true;
+      dragDist.current = 0;
       prevMouse.current = { x: e.clientX, y: e.clientY };
     };
     const onMouseMove = (e: MouseEvent) => {
       if (!isDragging.current) return;
       const dx = e.clientX - prevMouse.current.x;
       const dy = e.clientY - prevMouse.current.y;
-      yaw.current -= dx * 0.002;
-      pitch.current -= dy * 0.002;
+      dragDist.current += Math.abs(dx) + Math.abs(dy);
+      if (dragDist.current >= 3) {
+        yaw.current -= dx * 0.002;
+        pitch.current -= dy * 0.002;
+      }
       pitch.current = THREE.MathUtils.clamp(pitch.current, -Math.PI / 2.2, Math.PI / 2.2);
       prevMouse.current = { x: e.clientX, y: e.clientY };
     };
-    const onMouseUp = () => { isDragging.current = false; };
+    const onMouseUp = (e: MouseEvent) => {
+      const handler = useCameraStore.getState().onClickHandler;
+      if (isDragging.current && dragDist.current < 3 && handler) {
+        handler(e);
+      }
+      isDragging.current = false;
+    };
 
     // 滚轮调速
     const onWheel = (e: WheelEvent) => {
-      const currentSpeed = useCameraStore.getState().speed;
-      const newSpeed = THREE.MathUtils.clamp(
-        currentSpeed * (e.deltaY < 0 ? 1.2 : 0.8),
-        1,
-        300,
-      );
-      useCameraStore.getState().setSpeed(newSpeed);
+      // 滚轮缩放 FOV
+      const delta = e.deltaY > 0 ? 1.5 : -1.5;
+      camera.fov = THREE.MathUtils.clamp(camera.fov + delta, 15, 90);
+      camera.updateProjectionMatrix();
     };
 
     // T-010: 移动端触控
@@ -165,8 +181,8 @@ export default function CameraController() {
 
       if (t >= 1) {
         autoFlyDone.current = true;
-        // 飞行结束，停在视角起始位
-        camera.position.set(0, 0, BASE_Z);
+        // 飞行结束，停在视角起始位（抬高 40）
+        camera.position.set(0, 40, BASE_Z);
         camera.lookAt(0, 0, 0);
       }
 
@@ -180,24 +196,57 @@ export default function CameraController() {
       autoFlyDone.current = false;
     }
 
-    const k = keys.current;
-    let forward = 0;
-    let strafe = 0;
+    const orbitTarget = useCameraStore.getState().orbitTarget;
+    const flyToTarget = useCameraStore.getState().flyToTarget;
 
-    if (k.has('w') || k.has('arrowup')) forward += 1;
-    if (k.has('s') || k.has('arrowdown')) forward -= 1;
-    if (k.has('a') || k.has('arrowleft')) strafe -= 1;
-    if (k.has('d') || k.has('arrowright')) strafe += 1;
+    if (flyToTarget) {
+      const target = new THREE.Vector3(...flyToTarget);
+      const desired = target.clone().add(new THREE.Vector3(0, 10, 40));
+      camera.position.lerp(desired, 1 - Math.pow(0.0015, dt || 0.016));
+      camera.lookAt(target.x, target.y + 5, target.z);
+      if (camera.position.distanceTo(desired) < 1.5) {
+        useCameraStore.getState().setFlyToTarget(null);
+        useCameraStore.getState().setOrbitTarget(flyToTarget);
+      }
+    } else if (orbitTarget) {
+      // === 环绕模式 ===
+      const target = new THREE.Vector3(...orbitTarget);
+      const dist = camera.position.distanceTo(target);
+      const newDist = dist + (speed * 0.5 * (dt || 0.016)) * ((keys.current.has('w') ? -1 : 0) + (keys.current.has('s') ? 1 : 0));
+      const clampedDist = Math.max(30, Math.min(250, newDist));
 
-    const dir = new THREE.Vector3(0, 0, -1);
-    dir.applyQuaternion(camera.quaternion);
+      // 计算新位置（保持lookAt target，仅旋转+距离）
+      const offset = camera.position.clone().sub(target).normalize().multiplyScalar(clampedDist);
+      camera.position.copy(target).add(offset);
+      camera.lookAt(target);
 
-    const right = new THREE.Vector3(1, 0, 0);
-    right.applyQuaternion(camera.quaternion);
+      // Esc 退出环绕
+      if (keys.current.has('escape')) {
+        useCameraStore.getState().setOrbitTarget(null);
+        keys.current.delete('escape');
+      }
+    } else {
+      // === 自由飞行模式 ===
+      const k = keys.current;
+      let forward = 0, strafe = 0, lift = 0;
 
-    const spd = speed * (dt || 0.016);
-    if (forward !== 0) camera.position.addScaledVector(dir, forward * spd);
-    if (strafe !== 0) camera.position.addScaledVector(right, strafe * spd);
+      if (k.has('w') || k.has('arrowup')) forward += 1;
+      if (k.has('s') || k.has('arrowdown')) forward -= 1;
+      if (k.has('a') || k.has('arrowleft')) strafe -= 1;
+      if (k.has('d') || k.has('arrowright')) strafe += 1;
+      if (k.has(' ')) lift += 1;
+      if (k.has('shift')) lift -= 1;
+
+      const dir = new THREE.Vector3(0, 0, -1);
+      dir.applyQuaternion(camera.quaternion);
+      const right = new THREE.Vector3(1, 0, 0);
+      right.applyQuaternion(camera.quaternion);
+
+      const spd = (speed * 2) * (dt || 0.016);
+      if (forward !== 0) camera.position.addScaledVector(dir, forward * spd);
+      if (strafe !== 0) camera.position.addScaledVector(right, strafe * spd);
+      if (lift !== 0) camera.position.y += lift * spd;
+    }
 
     // T-007: 落地页视差 — 滚动驱动相机后拉
     if (!isLandingDone) {

@@ -109,6 +109,27 @@
   --hud-bottom-height: 40px;
 }
 
+/* 呼吸光晕动画 */
+@keyframes breathe-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 6px rgba(255, 210, 122, 0.15));
+  }
+  50% {
+    filter: drop-shadow(0 0 18px rgba(255, 210, 122, 0.35));
+  }
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* 背景设为默认墨黑（全局） */
 html {
   background: var(--ink-900);

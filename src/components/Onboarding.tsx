@@ -46,6 +46,15 @@ export default function Onboarding() {
 
   return (
     <>
+      {/* fly 阶段：飞行提示 */}
+      {phase === 'fly' && (
+        <div style={{ position:'fixed', bottom:'30%', left:'50%', transform:'translateX(-50%)', zIndex:25, pointerEvents:'none' }}>
+          <p style={{ fontFamily:'var(--font-dream)', fontSize:'var(--text-body-lg)', color:'var(--gold-500)', opacity:0.7, textShadow:'0 0 16px var(--gold-500)66', animation:'breathe-glow 3s ease-in-out infinite' }}>
+            正在飞向星海深处...
+          </p>
+        </div>
+      )}
+
       {/* 半透明遮罩 (仅在 done 阶段显示文字时才需要) */}
       {phase === 'done' && (
         <div
