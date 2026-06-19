@@ -13,6 +13,7 @@ import Settings from './Settings';
 import FPSMonitor from '../components/FPSMonitor';
 import ShortcutPanel from '../components/ShortcutPanel';
 import OnlineIndicator from '../components/OnlineIndicator';
+import SpaceAmbience from '../components/SpaceAmbience';
 import DreamInput from './Input';
 import { useUIStore } from '../store/uiStore';
 import { useDreamStore } from '../store/dreamStore';
@@ -109,6 +110,8 @@ export default function ScenePage() {
 
       {/* T-020: 在线状态 */}
       <OnlineIndicator />
+      {/* 太空氛围音效 */}
+      <SpaceAmbience />
 
       {/* IndexedDB 同步状态指示 */}
       {dbStatus === 'error' && (

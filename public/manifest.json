@@ -1,26 +1,10 @@
 {
   "name": "梦海 Oneironaut",
   "short_name": "梦海",
-  "description": "漫游于梦境之海 — Web 3D 梦境可视化与生成平台",
+  "description": "漫游于梦境之海",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "any",
-  "background_color": "#04050a",
   "theme_color": "#04050a",
-  "categories": ["entertainment", "lifestyle"],
-  "lang": "zh-CN",
-  "icons": [
-    {
-      "src": "/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
+  "background_color": "#04050a",
+  "icons": []
 }
