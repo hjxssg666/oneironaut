@@ -40,6 +40,15 @@ export default function ScenePage() {
 
   useEffect(() => { initFromDB(); }, [initFromDB]);
 
+  // 移动端自动低画质
+  useEffect(() => {
+    const isMobile = window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent);
+    if (!isMobile) return;
+    const { cycleQuality } = useUIStore.getState();
+    cycleQuality(); // high→medium (or medium→low on tablets)
+    if (window.innerWidth <= 480) cycleQuality(); // medium→low
+  }, []);
+
   // 35K 梦境已在 dreamStore 初始化时同步生成，落地页就有星辰
   const handleVoidClick = () => {
     const generated = generateVoidDream();

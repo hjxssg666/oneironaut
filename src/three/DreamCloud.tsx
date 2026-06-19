@@ -1065,7 +1065,7 @@ gl_FragColor=vec4(col,alpha);}`,
       }
     };
 
-    // hover 检测 → tooltip
+    // hover 检测 → 高亮 glow + tooltip
     const tooltip = document.createElement('div');
     tooltip.style.cssText = `position:fixed;z-index:100;pointer-events:none;
       font-family:var(--font-dream);font-size:12px;color:var(--gold-500);
@@ -1076,11 +1076,17 @@ gl_FragColor=vec4(col,alpha);}`,
     document.body.appendChild(tooltip);
     let hoverTimer: ReturnType<typeof setTimeout>;
 
+    // hover 高亮发光点
+    let hoverGlow: THREE.Points | null = null;
+    const MAX_HOVER_RADIUS = 2.5; // 检测半径
+    const glowSize = 14.0;
+
     const onHover = (e: MouseEvent) => {
       if (!camera || !coreRef.current || !gl) return;
       if (e.target instanceof HTMLElement && e.target.closest('[data-ui],button,a')) {
         clearTimeout(hoverTimer);
         tooltip.style.display = 'none';
+        if (hoverGlow) { groupRef.current?.remove(hoverGlow); hoverGlow = null; }
         return;
       }
       const mouse = new THREE.Vector2(
@@ -1089,7 +1095,7 @@ gl_FragColor=vec4(col,alpha);}`,
       );
       const rc = new THREE.Raycaster();
       rc.setFromCamera(mouse, camera);
-      rc.params.Points.threshold = 1.5;
+      rc.params.Points.threshold = MAX_HOVER_RADIUS;
       const list = dreams.filter(d => {
         if (emotionFilter && d.emotion !== emotionFilter) return false;
         if (themeFilter && !d.themes.includes(themeFilter)) return false;
@@ -1106,10 +1112,37 @@ gl_FragColor=vec4(col,alpha);}`,
           tooltip.style.top = (e.clientY - 36) + 'px';
           clearTimeout(hoverTimer);
           hoverTimer = setTimeout(() => { tooltip.style.display = 'block'; }, 800);
+
+          // 即时 hover 高亮发光
+          if (!hoverGlow) {
+            const hGeo = new THREE.BufferGeometry();
+            hGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array([d.position[0], d.position[1], d.position[2]]), 3));
+            hGeo.setAttribute('color', new THREE.BufferAttribute(new Float32Array([1.0, 0.95, 0.7]), 3));
+            hGeo.setAttribute('size', new THREE.BufferAttribute(new Float32Array([glowSize]), 1));
+            // 简单圆形发光 shader
+            const hMat = new THREE.ShaderMaterial({
+              uniforms: { uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) } },
+              vertexShader: stellarVert,
+              fragmentShader: `varying vec3 vColor;
+void main(){vec2 uv=gl_PointCoord-0.5;float d=length(uv*2.0);if(d>1.0)discard;
+float glow=1.0-smoothstep(0.0,0.85,d);glow=pow(glow,2.0)*0.7;
+float core=pow(1.0-smoothstep(0.0,0.1,d),4.0);
+float alpha=clamp(glow+core,0.0,1.0);
+vec3 col=vColor*glow*1.2+vec3(1.0,0.98,0.9)*core*2.0;
+gl_FragColor=vec4(col,alpha*0.9);}`,
+              transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+            });
+            hoverGlow = new THREE.Points(hGeo, hMat);
+            groupRef.current?.add(hoverGlow);
+          } else {
+            (hoverGlow.geometry.attributes.position as THREE.BufferAttribute).set([d.position[0], d.position[1], d.position[2]]);
+            (hoverGlow.geometry.attributes.position as THREE.BufferAttribute).needsUpdate = true;
+          }
         }
       } else {
         clearTimeout(hoverTimer);
         tooltip.style.display = 'none';
+        if (hoverGlow) { groupRef.current?.remove(hoverGlow); hoverGlow.geometry.dispose(); (hoverGlow.material as THREE.Material).dispose(); hoverGlow = null; }
       }
     };
 
