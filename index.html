@@ -36,7 +36,12 @@
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="loading-splash" style="display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;background:#04050a;font-family:system-ui,sans-serif;color:rgba(255,255,255,0.6);font-size:18px;">
+        <span style="animation:pulse 1.8s ease-in-out infinite;">入梦中...</span>
+      </div>
+    </div>
+    <style>@keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}#root>div:not(#loading-splash){display:none}</style>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
