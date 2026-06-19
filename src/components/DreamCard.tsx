@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDreamStore } from '../store/dreamStore';
 import { useUIStore } from '../store/uiStore';
 import { useCameraStore } from '../store/cameraStore';
 import { moodLabels, moodColors, moodOptions } from '../constants/moods';
 
 export default function DreamCard() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   const selectedDream = useDreamStore((s) => s.selectedDream);
   const selectedSubDream = useDreamStore((s) => s.selectedSubDream);
   const subDreams = useDreamStore((s) => s.subDreams);
@@ -75,18 +83,19 @@ export default function DreamCard() {
         style={{
           position: 'fixed',
           bottom: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
+          left: 0,
+          right: 0,
           zIndex: 30,
-          width: '100%',
-          maxWidth: 540,
+          maxWidth: isMobile ? '100vw' : 540,
+          margin: '0 auto',
           animation: 'dreamSlideUp 0.5s var(--ease-spring)',
+          paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 0px)' : 0,
         }}
       >
         <div
           className="glass-panel"
           style={{
-            padding: 'var(--space-8) var(--space-10) var(--space-6)',
+            padding: isMobile ? 'var(--space-5) var(--space-5) var(--space-4)' : 'var(--space-8) var(--space-10) var(--space-6)',
             borderBottomLeftRadius: 0,
             borderBottomRightRadius: 0,
             border: `1px solid ${moodColor}66`,
@@ -123,19 +132,19 @@ export default function DreamCard() {
               {selectedSubDream && (
                 <button onClick={() => selectSubDream(null)}
                   style={{
-                    fontFamily: 'var(--font-dream)', fontSize: 12, padding: '4px 14px',
+                    fontFamily: 'var(--font-dream)', fontSize: isMobile ? 14 : 12,
+                    padding: isMobile ? '8px 18px' : '4px 14px', minHeight: isMobile ? 44 : undefined,
                     color: moodColor, background: `${moodColor}22`,
                     border: `1px solid ${moodColor}66`, borderRadius: 'var(--radius-full)',
-                    cursor: 'pointer', transition: 'all 0.2s',
+                    cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = `${moodColor}44`; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = `${moodColor}22`; }}
                 >← 回核心</button>
               )}
               <button onClick={() => { setIsEditing(false); selectSubDream(null); setDreamCardOpen(false); }}
                 style={{
-                  fontSize: 20, lineHeight: 1, padding: '0 8px', background: 'none', border: 'none',
-                  color: 'var(--muted-200)', cursor: 'pointer',
+                  fontSize: 20, lineHeight: 1, padding: isMobile ? '8px 14px' : '0 8px',
+                  minWidth: isMobile ? 44 : undefined, minHeight: isMobile ? 44 : undefined,
+                  background: 'none', border: 'none', color: 'var(--muted-200)', cursor: 'pointer',
                 }}>×</button>
             </div>
           </div>
@@ -238,7 +247,7 @@ export default function DreamCard() {
                       }} />
                       ✦ 萦绕的微光 · {subs.length} 颗
                     </div>
-                    <div style={{ maxHeight: 180, overflowY: 'auto', paddingRight: 4 }}>
+                    <div style={{ maxHeight: isMobile ? '30vh' : 180, overflowY: 'auto', paddingRight: 4 }}>
                       {subs.map((sub) => {
                         const sc = moodColors[sub.emotion] ?? 'var(--gold-500)';
                         const sl = moodLabels[sub.emotion] ?? sub.emotion;
@@ -350,7 +359,7 @@ export default function DreamCard() {
       {toastMsg && (
         <div
           style={{
-            position: 'fixed', bottom: 120, left: '50%', transform: 'translateX(-50%)', zIndex: 50,
+            position: 'fixed', bottom: `calc(120px + env(safe-area-inset-bottom, 0px))`, left: '50%', transform: 'translateX(-50%)', zIndex: 50,
             background: 'var(--alpha-gold-40)', color: 'var(--fg-100)',
             padding: '6px 20px', borderRadius: 'var(--radius-full)',
             fontFamily: 'var(--font-dream)', fontSize: 'var(--text-body-sm)',

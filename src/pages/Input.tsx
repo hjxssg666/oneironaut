@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDreamStore } from '../store/dreamStore';
 import { moodOptions } from '../constants/moods';
 
@@ -11,6 +11,14 @@ export default function DreamInput({ onClose, onSave }: Props) {
   const [themes, setThemes] = useState<string[]>([]);
   const [isPublic, setIsPublic] = useState(true);
   const dreams = useDreamStore((s) => s.dreams);
+
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const handleSubmit = () => {
     if (!content.trim()) return;
@@ -47,24 +55,24 @@ export default function DreamInput({ onClose, onSave }: Props) {
         className="glass-panel"
         style={{
           width: '100%',
-          maxWidth: 520,
+          maxWidth: isMobile ? '100vw' : 520,
           maxHeight: '90vh',
           overflow: 'auto',
-          padding: 'var(--space-10)',
+          padding: isMobile ? 'var(--space-6)' : 'var(--space-10)',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--space-8)' }}>
           <h2
             style={{
               fontFamily: 'var(--font-dream)',
-              fontSize: 'var(--text-heading-1)',
+              fontSize: isMobile ? 'var(--text-heading-2)' : 'var(--text-heading-1)',
               color: 'var(--gold-500)',
               fontWeight: 'var(--fw-light)',
             }}
           >
             记下你的梦
           </h2>
-          <button className="btn" onClick={onClose}>×</button>
+          <button className="btn" onClick={onClose} style={{ padding: isMobile ? '8px 14px' : undefined, fontSize: isMobile ? 20 : undefined }}>×</button>
         </div>
 
         {/* 输入区 */}
@@ -134,19 +142,21 @@ export default function DreamInput({ onClose, onSave }: Props) {
             公开度
           </p>
           <div style={{ display: 'flex', gap: 16 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '8px 0', minHeight: 44 }}>
               <input
                 type="radio"
                 checked={!isPublic}
                 onChange={() => setIsPublic(false)}
+                style={{ width: 20, height: 20 }}
               />
               <span style={{ fontSize: 'var(--text-body-md)' }}>仅自己</span>
             </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '8px 0', minHeight: 44 }}>
               <input
                 type="radio"
                 checked={isPublic}
                 onChange={() => setIsPublic(true)}
+                style={{ width: 20, height: 20 }}
               />
               <span style={{ fontSize: 'var(--text-body-md)' }}>公开</span>
             </label>

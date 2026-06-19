@@ -32,7 +32,7 @@ export default function SearchBar() {
     <div
       style={{
         position: 'fixed',
-        top: 80,
+        top: 'calc(80px + env(safe-area-inset-top, 0px))',
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 20,
