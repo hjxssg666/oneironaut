@@ -1,15 +1,4 @@
-/**
- * DreamCloud v7 — 还原版
- *
- * 诗云参考图前的稳定状态：
- *   ✓ 极细沙粒（0.4~1.4px）
- *   ✓ 8 情绪色（粉/绿/金主调）
- *   ✓ 中心白热核心（6000 颗）
- *   ✓ 适度扩散（spread 13）
- *   ✓ 中心聚集、向外渐暗
- *   ✓ 纯黑底
- *   ✓ 摄像头 Y=40, Z=180
- */
+
 import { useEffect, useRef } from 'react';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';

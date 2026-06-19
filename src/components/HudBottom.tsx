@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useCameraStore } from '../store/cameraStore';
 import { useUIStore, type Quality } from '../store/uiStore';
 import { useDreamStore } from '../store/dreamStore';
@@ -12,6 +13,14 @@ export default function HudBottom() {
   const fiberNetMode = useUIStore((s) => s.fiberNetMode);
   const dreamCount = useDreamStore((s) => s.dreams.length);
 
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   if (!isHudVisible) return null;
 
   return (
@@ -22,6 +31,7 @@ export default function HudBottom() {
         left: 0,
         right: 0,
         height: 44,
+        paddingBottom: isMobile ? 'env(safe-area-inset-bottom, 16px)' : 0,
         zIndex: 10,
         display: 'flex',
         alignItems: 'center',
@@ -34,7 +44,9 @@ export default function HudBottom() {
         pointerEvents: 'none',
       }}
     >
-      <span style={{ opacity: 0.55, fontSize: 'var(--text-body-sm)' }}>御风而行 · 拖拽览星 · 滚轮疾驰</span>
+      <span style={{ opacity: 0.55, fontSize: 'var(--text-body-sm)' }}>
+        {isMobile ? '双指缩放 · 滑动环顾' : '御风而行 · 拖拽览星 · 滚轮疾驰'}
+      </span>
 
       {fiberNetMode === 'all' && (
         <span style={{

@@ -47,13 +47,16 @@ export default function HudTop() {
       }}
     >
       {/* 主 HUD 行 */}
+      {/* 移动端：标题单独一行；桌面端：标题+按钮同行 */}
       <div
         style={{
           display: 'flex',
-          alignItems: 'center',
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'stretch' : 'center',
           justifyContent: 'space-between',
-          padding: '0 var(--space-8)',
-          minHeight: 'var(--hud-top-height)',
+          padding: isMobile ? '8px 12px 0' : '0 var(--space-8)',
+          minHeight: isMobile ? 'auto' : 'var(--hud-top-height)',
+          gap: isMobile ? 6 : 0,
           background: 'rgba(0,0,0,0)',
         }}
       >
@@ -81,18 +84,27 @@ export default function HudTop() {
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 6 : 12, pointerEvents: 'auto' }}>
+        {/* 按钮组：移动端独立一行 + 横滑 */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: isMobile ? 6 : 12,
+          pointerEvents: 'auto',
+          overflowX: isMobile ? 'auto' : 'visible',
+          whiteSpace: isMobile ? 'nowrap' : 'normal',
+          WebkitOverflowScrolling: 'touch',
+          paddingBottom: isMobile ? 4 : 0,
+        }}>
           {[ ['溯流','timeline'],['拾遗','collect'],['演梦','ai'],['设置','settings'] ].map(([label,view]) => (
             <button key={view}
               className="btn"
               onClick={() => setView(selectedView === view ? 'stars' : view as any)}
               style={{
-                fontSize: isMobile ? 12 : undefined, fontFamily: 'var(--font-dream)',
+                flexShrink: 0, fontSize: isMobile ? 11 : undefined, fontFamily: 'var(--font-dream)',
+                padding: isMobile ? '4px 10px' : undefined,
                 color: selectedView === view ? 'var(--gold-500)' : undefined,
                 transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-              onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
             >{label}</button>
           ))}
           <button className="btn" onClick={() => {
@@ -110,24 +122,16 @@ export default function HudTop() {
             a.href = wm.toDataURL('image/png');
             a.click();
           }}
-            style={{ fontSize: isMobile ? 12 : undefined, fontFamily: 'var(--font-dream)', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
+            style={{ flexShrink: 0, fontSize: isMobile ? 11 : undefined, fontFamily: 'var(--font-dream)', padding: isMobile ? '4px 10px' : undefined, transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
           >留影</button>
           <button className="btn" onClick={toggleSearch}
-            style={{ fontSize: isMobile ? 12 : undefined, fontFamily: 'var(--font-dream)', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
+            style={{ flexShrink: 0, fontSize: isMobile ? 11 : undefined, fontFamily: 'var(--font-dream)', padding: isMobile ? '4px 10px' : undefined, transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
           >寻星</button>
           <button className="btn" onClick={cycleFiberNetMode}
-            style={{ fontSize: isMobile ? 12 : undefined, fontFamily: 'var(--font-dream)', color: fiberNetMode !== 'off' ? 'var(--gold-500)' : 'var(--muted-200)', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
+            style={{ flexShrink: 0, fontSize: isMobile ? 11 : undefined, fontFamily: 'var(--font-dream)', padding: isMobile ? '4px 10px' : undefined, color: fiberNetMode !== 'off' ? 'var(--gold-500)' : 'var(--muted-200)', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
           >{{ off: '静海', selected: '牵星', all: '星罗' }[fiberNetMode]}</button>
           <button className="btn btn-primary" onClick={() => setInputOpen(true)}
-            style={{ fontSize: isMobile ? 12 : undefined, fontFamily: 'var(--font-dream)', animation: 'breathe-glow 3s ease-in-out infinite', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.1) translateY(-2px)'; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1) translateY(0)'; }}
+            style={{ flexShrink: 0, fontSize: isMobile ? 11 : undefined, fontFamily: 'var(--font-dream)', padding: isMobile ? '4px 12px' : undefined, animation: 'breathe-glow 3s ease-in-out infinite', transition: 'all 0.25s cubic-bezier(0.34,1.56,0.64,1)' }}
           >缀一颗星</button>
         </div>
       </div>

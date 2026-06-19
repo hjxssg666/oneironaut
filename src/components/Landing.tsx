@@ -9,6 +9,8 @@ export default function Landing() {
   const [exiting, setExiting] = useState(false);
   const accumulated = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
+  // 触控起始位置
+  const touchStartY = useRef(0);
 
   const sections = [
     { title: '梦海', subtitle: 'Oneironaut', desc: '每一条梦都是一颗星' },
@@ -16,20 +18,33 @@ export default function Landing() {
     { title: '', subtitle: '', desc: '', cta: '进入梦海' },
   ];
 
-  /** 滚动 → progress */
+  const advance = useCallback((delta: number) => {
+    accumulated.current += delta;
+    const step = accumulated.current / 120 / 3;
+    const progress = Math.max(0, Math.min(1, step));
+    setLandingProgress(progress);
+    setActiveSection(progress < 0.33 ? 0 : progress < 0.66 ? 1 : 2);
+  }, [setLandingProgress]);
+
   const handleWheel = useCallback(
     (e: WheelEvent) => {
       e.preventDefault();
-      accumulated.current += e.deltaY;
-      const step = accumulated.current / 120 / 3;
-      const progress = Math.max(0, Math.min(1, step));
-      setLandingProgress(progress);
-      setActiveSection(progress < 0.33 ? 0 : progress < 0.66 ? 1 : 2);
+      advance(e.deltaY);
     },
-    [setLandingProgress],
+    [advance],
   );
 
-  /** 点击进入 — 任意位置都可直接进入 */
+  /** 触控滑动 */
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    const dy = touchStartY.current - e.touches[0].clientY;
+    advance(dy - (accumulated.current * 120 * 3)); // 基于当前位置
+    touchStartY.current = e.touches[0].clientY;
+  }, [advance]);
+
   const handleClick = useCallback(() => {
     setLandingProgress(1);
     setExiting(true);
@@ -41,11 +56,15 @@ export default function Landing() {
     if (!el) return;
     el.addEventListener('wheel', handleWheel, { passive: false });
     el.addEventListener('click', handleClick);
+    el.addEventListener('touchstart', handleTouchStart, { passive: true });
+    el.addEventListener('touchmove', handleTouchMove, { passive: false });
     return () => {
       el.removeEventListener('wheel', handleWheel);
       el.removeEventListener('click', handleClick);
+      el.removeEventListener('touchstart', handleTouchStart);
+      el.removeEventListener('touchmove', handleTouchMove);
     };
-  }, [handleWheel, handleClick]);
+  }, [handleWheel, handleClick, handleTouchStart, handleTouchMove]);
 
   if (isLandingDone) return null;
   const s = sections[activeSection];
